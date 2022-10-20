@@ -2,9 +2,11 @@ package main
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"fmt"
 	"github.com/mattn/go-isatty"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -20,7 +22,25 @@ type flusher interface {
 func main() {
 	//filePath()
 	//buffering()
-	useIsatty()
+	//useIsatty()
+	multiWrite()
+}
+
+func multiWrite() {
+	tmp, _ := ioutil.TempFile(os.TempDir(), "tmp")
+	defer tmp.Close()
+
+	hash := sha256.New()
+
+	w := io.MultiWriter(tmp, hash)
+
+	written, _ := io.Copy(w, os.Stdin)
+
+	fmt.Printf("Wrote %d bytes to %s \nSHA256: %x \n",
+		written,
+		tmp.Name(),
+		hash.Sum(nil),
+	)
 }
 
 func useIsatty() {
