@@ -2,17 +2,21 @@ package main
 
 import (
 	"bufio"
+	crand "crypto/rand"
 	"crypto/sha256"
+	"encoding/binary"
 	"fmt"
 	"github.com/mattn/go-isatty"
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 type flusher interface {
@@ -23,7 +27,26 @@ func main() {
 	//filePath()
 	//buffering()
 	//useIsatty()
-	multiWrite()
+	//multiWrite()
+	//mathRand()
+	cryptRand()
+}
+
+func cryptRand() {
+	var s int64
+	if err := binary.Read(crand.Reader, binary.LittleEndian, &s); err != nil {
+		s = time.Now().UnixNano()
+
+	}
+	rand.Seed(s)
+	n := rand.Intn(100)
+	fmt.Println(n)
+}
+
+func mathRand() {
+	rand.Seed(42)
+	n := rand.Intn(100)
+	fmt.Println(n)
 }
 
 func multiWrite() {
