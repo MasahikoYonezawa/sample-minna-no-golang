@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
+	"github.com/dustin/go-humanize"
 	"github.com/mattn/go-isatty"
 	"io"
 	"io/ioutil"
@@ -29,7 +30,18 @@ func main() {
 	//useIsatty()
 	//multiWrite()
 	//mathRand()
-	cryptRand()
+	//cryptRand()
+	useHumanize()
+}
+
+func useHumanize() {
+	name := os.Args[1]
+	s, _ := os.Stat(name)
+	fmt.Printf(
+		"%s: %s \n",
+		name,
+		humanize.Bytes(uint64(s.Size())),
+	)
 }
 
 func cryptRand() {
