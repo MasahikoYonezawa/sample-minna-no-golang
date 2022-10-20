@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	crand "crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
@@ -38,7 +39,38 @@ func main() {
 	//cryptRand()
 	//useHumanize()
 	//tr(os.Stdin, os.Stdout, os.Stderr)
-	stopRoutine()
+	//stopRoutine()
+	stopRoutineWitContext()
+}
+
+func stopRoutineWitContext() {
+	ctx, cancel := context.WithCancel(context.Background())
+	queue := make(chan string)
+	for i := 0; i < 2; i++ {
+		globalWG.Add(1)
+		go fetchURLWithContext(ctx, queue)
+	}
+
+	queue <- "https://www.example.com"
+	queue <- "https://www.example.net"
+	queue <- "https://www.example.net/foo"
+	queue <- "https://www.example.net/bar"
+
+	cancel()
+	globalWG.Wait()
+}
+
+func fetchURLWithContext(ctx context.Context, queue chan string) {
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("worker exit")
+			globalWG.Done()
+			return
+		case url2 := <-queue:
+			fmt.Println("fetching", url2)
+		}
+	}
 }
 
 func stopRoutine() {
