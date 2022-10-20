@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path"
 	"path/filepath"
 	"strings"
@@ -40,7 +41,44 @@ func main() {
 	//useHumanize()
 	//tr(os.Stdin, os.Stdout, os.Stderr)
 	//stopRoutine()
-	stopRoutineWitContext()
+	//stopRoutineWitContext()
+	signalHandling()
+}
+
+func signalHandling() {
+	defer fmt.Println("done")
+	trapSignals := []os.Signal{
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+	}
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, trapSignals...)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		sig := <-sigCh
+		fmt.Println("Got signal", sig)
+
+		cancel()
+	}()
+
+	doMain(ctx)
+}
+
+func doMain(ctx context.Context) {
+	defer fmt.Println("done doMain")
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+
+		}
+		fmt.Println("do something")
+	}
 }
 
 func stopRoutineWitContext() {
