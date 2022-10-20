@@ -27,6 +27,8 @@ type flusher interface {
 	Flush() error
 }
 
+var globalWG sync.WaitGroup
+
 func main() {
 	//filePath()
 	//buffering()
@@ -35,7 +37,37 @@ func main() {
 	//mathRand()
 	//cryptRand()
 	//useHumanize()
-	tr(os.Stdin, os.Stdout, os.Stderr)
+	//tr(os.Stdin, os.Stdout, os.Stderr)
+	stopRoutine()
+}
+
+func stopRoutine() {
+	queue := make(chan string)
+	for i := 0; i < 2; i++ {
+		globalWG.Add(1)
+		go fetchURL(queue)
+	}
+
+	queue <- "https://www.example.com"
+	queue <- "https://www.example.net"
+	queue <- "https://www.example.net/foo"
+	queue <- "https://www.example.net/bar"
+
+	close(queue)
+	globalWG.Wait()
+}
+
+func fetchURL(queue chan string) {
+	for {
+		url, more := <-queue
+		if more {
+			fmt.Println("fetching", url)
+		} else {
+			fmt.Println("worker exit")
+			globalWG.Done()
+			return
+		}
+	}
 }
 
 func tr(src io.Reader, dst io.Writer, errDst io.Writer) error {
