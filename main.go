@@ -1,15 +1,31 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
+	//filePath()
+	buffering()
+}
+
+func buffering() {
+	b := bufio.NewWriter(os.Stdout)
+	for i := 0; i < 100; i++ {
+		fmt.Fprintln(b, strings.Repeat("x", 100))
+	}
+	b.Flush()
+}
+
+func filePath() {
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
